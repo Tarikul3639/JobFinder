@@ -5,10 +5,8 @@ from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 from googlesearch import search
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
-
-# Get the token from .env
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # Set up logging
@@ -17,53 +15,45 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-# Function for the /start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
-        "Welcome! I am your JobFinder bot.\n\n"
-        "I specialize in finding jobs related to Next.js, Node.js, NestJS, and Tailwind CSS "
-        "in Gazipur, Dhaka, and across Bangladesh.\n\n"
-        "Use /search to get the latest listings."
+        "Hello! I am your Professional JobFinder Bot.\n\n"
+        "I am looking for Full-Stack (Next.js, NestJS, MongoDB, Redux) "
+        "Junior/Associate positions in Dhaka.\n\n"
+        "Use /search to get the latest matches."
     )
     await context.bot.send_message(chat_id=update.effective_chat.id, text=welcome_text)
 
-# Function for the /search command
 async def search_jobs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id, 
-        text="Searching for the latest software jobs in BD (Next.js, Node.js, etc.)... Please wait."
+        text="Searching for Junior/Entry-level Full-Stack jobs in Dhaka (Next.js, NestJS, MongoDB)..."
     )
     
-    # Updated query to include technologies and locations
-    query = '("Next.js" OR "Node.js" OR "NestJS" OR "Tailwind CSS") AND ("Gazipur" OR "Dhaka" OR "Bangladesh") job'
+    # Optimized search query for Junior roles in Dhaka
+    query = ('(site:linkedin.com/jobs OR site:bdjobs.com OR site:indeed.com) '
+             '"Junior" OR "Entry-level" OR "Associate" '
+             '"Full Stack Developer" AND ("Next.js" OR "NestJS" OR "MongoDB" OR "Redux") '
+             'AND "Dhaka" job')
     
     try:
-        # Fetching results using googlesearch-python
-        results = list(search(query, num_results=7, advanced=True))
+        results = list(search(query, num_results=10, advanced=True))
         
-        message_text = "🎯 *Latest Job Matches:*\n\n"
+        message_text = "🎯 *Best Job Matches for You in Dhaka:*\n\n"
         if results:
             for result in results:
-                # result.title and result.url provide better context than just the URL
                 message_text += f"• [{result.title}]({result.url})\n\n"
         else:
-            message_text = "Sorry, no specific job updates were found for these technologies."
+            message_text = "No job updates found currently. Try again later!"
             
     except Exception as e:
-        message_text = "An error occurred while searching. Please try again later."
+        message_text = "Search error occurred."
         logging.error(f"Search error: {e}")
 
-    # Use parse_mode='Markdown' to make the links clickable
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id, 
-        text=message_text,
-        parse_mode='Markdown'
-    )
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=message_text, parse_mode='Markdown')
 
 if __name__ == '__main__':
     application = ApplicationBuilder().token(BOT_TOKEN).build()
-    
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('search', search_jobs))
-    
     application.run_polling()
