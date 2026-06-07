@@ -1,43 +1,55 @@
-import logging
+import requests
+from bs4 import BeautifulSoup
 import os
-from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
+import datetime
 from dotenv import load_dotenv
 
-# Load environment variables from the .env file
+# Load variables
 load_dotenv()
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+LAST_RUN_FILE = "last_run.txt"
 
-# Set up logging configuration
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
-    level=logging.INFO
-)
+def get_today_date():
+    return datetime.date.today().isoformat()
 
-async def search_jobs(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Handles the /search command. 
-    Provides a curated list of junior-friendly full-stack job opportunities in Dhaka.
-    """
-    response = "🎯 *Junior/Entry-Level Full Stack Jobs in Dhaka:*\n\n"
-    response += "Skills: Next.js, NestJS, MongoDB, Redux Toolkit, Tailwind CSS\n\n"
-    
-    # Curated job opportunities for entry-level developers in Dhaka
-    response += "1. [BrainStation-23](https://brainstation-23.com/career/) (Focus: Junior/Internship roles)\n"
-    response += "2. [BJIT](https://bjitgroup.com/career/) (Focus: Entry-level tracks)\n"
-    response += "3. [Cefalo Bangladesh](https://cefalo.com/careers/) (Focus: Junior Engineer)\n"
-    response += "4. [Dcastalia](https://dcastalia.com/careers/) (Focus: Junior Developer)\n"
-    response += "5. [Selise Digital Platforms](https://selise.ch/careers/) (Focus: Associate Engineer)\n\n"
-    
-    response += "_Note: Emphasize your GitHub projects and technical documentation in your resume to stand out._"
-    
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=response, parse_mode='Markdown')
+def check_already_run():
+    if os.path.exists(LAST_RUN_FILE):
+        with open(LAST_RUN_FILE, "r") as f:
+            return f.read().strip() == get_today_date()
+    return False
 
-if __name__ == '__main__':
-    # Initialize the Telegram bot application
-    if not BOT_TOKEN:
-        logging.error("BOT_TOKEN is missing. Please check your .env file.")
+def mark_as_run():
+    with open(LAST_RUN_FILE, "w") as f:
+        f.write(get_today_date())
+
+def fetch_jobs():
+    # Simple example for BDJobs Full Stack search
+    url = "https://jobs.bdjobs.com/jobsearch.asp?fcatId=8&txtsearch=Full%20Stack%20Developer"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    jobs = []
+    # Simplified scraper for demo
+    for job in soup.select('.job-title-text')[:5]:
+        title = job.get_text(strip=True)
+        link = "https://jobs.bdjobs.com/" + job.find('a')['href']
+        jobs.append(f"• {title}\n  {link}")
+    
+    return "\n\n".join(jobs) if jobs else "No new jobs found today."
+
+def send_telegram(message):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
+    requests.post(url, data=payload)
+
+if __name__ == "__main__":
+    if not check_already_run():
+        print("Running job search...")
+        job_list = fetch_jobs()
+        msg = f"🎯 *Today's Full Stack Jobs:*\n\n{job_list}"
+        send_telegram(msg)
+        mark_as_run()
+        print("Done.")
     else:
-        application = ApplicationBuilder().token(BOT_TOKEN).build()
-        application.add_handler(CommandHandler('search', search_jobs))
-        application.run_polling()
+        print("Already ran today. Exiting.")

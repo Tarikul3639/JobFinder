@@ -1,52 +1,33 @@
-# JobFinder: Tech-Stack Focused Job Assistant
+# JobFinder Telegram Bot
 
-**JobFinder** is a smart and automated Telegram bot designed for software developers and tech professionals. It streamlines the job-hunting process by fetching real-time, relevant job listings based on specific tech stacks and target locations in Bangladesh.
+A Telegram bot designed to assist with junior-level full-stack job hunting. It provides curated opportunities and is being upgraded for real-time job scraping.
 
-## 🚀 Key Features
+## Prerequisites
 
-* **Targeted Search:** Specifically filters for roles involving **Next.js, Node.js, NestJS, and Tailwind CSS**.
-* **Location Aware:** Prioritizes job opportunities in **Gazipur, Dhaka, and across Bangladesh**.
-* **Clickable Results:** Delivers job titles and direct links in a clean, professional format directly to your Telegram chat.
-* **Secure Architecture:** Uses environment variables (`.env`) to ensure your Telegram Bot Token remains private and secure.
+- Python 3.11+
+- [Telegram Bot Token](https://t.me/botfather)
 
-## 🛠 Project Overview
+## Installation
 
-This bot is built using **Python** and the **python-telegram-bot** library. It utilizes the Google Search engine to aggregate real-time job data, ensuring that users receive the most up-to-date listings available.
+1. Clone the repository to your local machine.
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/Scripts/activate  # For Git Bash/Windows
+   ```
+3. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Create a `.env` file in the project root and add your Telegram bot token:
+   ```text
+   TELEGRAM_BOT_TOKEN=your_actual_token_here
+   ```
 
-## ⚙️ Setup Guide
+## Usage
 
-### 1. Install Dependencies
-
-Ensure your virtual environment is activated, then install the required libraries:
-
+Run the bot using the following command:
 ```bash
-pip install python-telegram-bot googlesearch-python python-dotenv
-
+python main.py
 ```
-
-### 2. Configuration
-
-Create a `.env` file in the root directory of your project and add your Telegram Bot Token:
-
-```text
-TELEGRAM_BOT_TOKEN=your_bot_token_here
-
-```
-
-### 3. Run the Bot
-
-Start the bot by running the following command in your terminal:
-
-```bash
-python3 bot.py
-
-```
-
-## 🤖 How to Use
-
-* **/start**: Initialize the bot and receive a welcome message.
-* **/search**: Trigger a real-time search for the latest jobs matching your tech stack (Next.js, Node.js, NestJS, Tailwind CSS) and preferred locations (Gazipur/Dhaka/Bangladesh).
-
----
-
-Does this English version cover everything you need for your project documentation?
+Once the bot is running, you can interact with it on Telegram using the `/search` command.

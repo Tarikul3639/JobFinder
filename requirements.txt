@@ -1,0 +1,5 @@
+python-telegram-bot
+googlesearch-python
+python-dotenv
+requests
+beautifulsoup4
