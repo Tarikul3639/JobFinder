@@ -2,58 +2,42 @@ import logging
 import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
-from googlesearch import search
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from the .env file
 load_dotenv()
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-# Set up logging
+# Set up logging configuration
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
     level=logging.INFO
 )
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    welcome_text = (
-        "Hello! I am your Professional JobFinder Bot.\n\n"
-        "I am looking for Full-Stack (Next.js, NestJS, MongoDB, Redux) "
-        "Junior/Associate positions in Dhaka.\n\n"
-        "Use /search to get the latest matches."
-    )
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=welcome_text)
-
 async def search_jobs(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id, 
-        text="Searching for Junior/Entry-level Full-Stack jobs in Dhaka (Next.js, NestJS, MongoDB)..."
-    )
+    """
+    Handles the /search command. 
+    Provides a curated list of junior-friendly full-stack job opportunities in Dhaka.
+    """
+    response = "🎯 *Junior/Entry-Level Full Stack Jobs in Dhaka:*\n\n"
+    response += "Skills: Next.js, NestJS, MongoDB, Redux Toolkit, Tailwind CSS\n\n"
     
-    # Optimized search query for Junior roles in Dhaka
-    query = ('(site:linkedin.com/jobs OR site:bdjobs.com OR site:indeed.com) '
-             '"Junior" OR "Entry-level" OR "Associate" '
-             '"Full Stack Developer" AND ("Next.js" OR "NestJS" OR "MongoDB" OR "Redux") '
-             'AND "Dhaka" job')
+    # Curated job opportunities for entry-level developers in Dhaka
+    response += "1. [BrainStation-23](https://brainstation-23.com/career/) (Focus: Junior/Internship roles)\n"
+    response += "2. [BJIT](https://bjitgroup.com/career/) (Focus: Entry-level tracks)\n"
+    response += "3. [Cefalo Bangladesh](https://cefalo.com/careers/) (Focus: Junior Engineer)\n"
+    response += "4. [Dcastalia](https://dcastalia.com/careers/) (Focus: Junior Developer)\n"
+    response += "5. [Selise Digital Platforms](https://selise.ch/careers/) (Focus: Associate Engineer)\n\n"
     
-    try:
-        results = list(search(query, num_results=10, advanced=True))
-        
-        message_text = "🎯 *Best Job Matches for You in Dhaka:*\n\n"
-        if results:
-            for result in results:
-                message_text += f"• [{result.title}]({result.url})\n\n"
-        else:
-            message_text = "No job updates found currently. Try again later!"
-            
-    except Exception as e:
-        message_text = "Search error occurred."
-        logging.error(f"Search error: {e}")
-
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=message_text, parse_mode='Markdown')
+    response += "_Note: Emphasize your GitHub projects and technical documentation in your resume to stand out._"
+    
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=response, parse_mode='Markdown')
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token(BOT_TOKEN).build()
-    application.add_handler(CommandHandler('start', start))
-    application.add_handler(CommandHandler('search', search_jobs))
-    application.run_polling()
+    # Initialize the Telegram bot application
+    if not BOT_TOKEN:
+        logging.error("BOT_TOKEN is missing. Please check your .env file.")
+    else:
+        application = ApplicationBuilder().token(BOT_TOKEN).build()
+        application.add_handler(CommandHandler('search', search_jobs))
+        application.run_polling()
